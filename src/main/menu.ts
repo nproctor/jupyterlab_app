@@ -80,6 +80,12 @@ class JupyterMainMenu {
      * @param menu The menu item configuration
      */
     private addMenu(event: any, menu: ItemOptions) {
+        let items = this.menu.items;
+        for (let i = 0, n = items.length; i < n; i++) {
+            if (items[i].label === menu.label) {
+                return;
+            }
+        }
         this.setClickEvents(menu);
 
         /* Set position in the native menu bar */
