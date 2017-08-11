@@ -43,7 +43,7 @@ class Application extends React.Component<Application.Props, Application.State> 
     constructor(props: Application.Props) {
         super(props);
         this._setLabDir();
-        this._registerFileHandler();
+        this._preventDefaults();
         this._renderServerManager = this._renderServerManager.bind(this);
         this._renderSplash = this._renderSplash.bind(this);
         this._renderEmpty = this._renderEmpty.bind(this);
@@ -59,7 +59,7 @@ class Application extends React.Component<Application.Props, Application.State> 
                 (this.refs.splash as SplashScreen).fadeSplashScreen();
                 return;
             }
-            
+            this._registerFileHandler();
             window.addEventListener('beforeunload', () => {
                 let stopMessage: ServerIPC.IRequestServerStop = {factoryId: data.factoryId}; 
                 ipcRenderer.send(ServerIPC.REQUEST_SERVER_STOP, stopMessage);
@@ -82,6 +82,7 @@ class Application extends React.Component<Application.Props, Application.State> 
                     console.log(e);
                 }
                 this._lab.restored.then( () => {
+                    ipcRenderer.send(AppIPC.READY_FOR_FILES);
                     (this.refs.splash as SplashScreen).fadeSplashScreen();
                 });
             });
@@ -235,10 +236,9 @@ class Application extends React.Component<Application.Props, Application.State> 
         return null;
     }
 
-    private _registerFileHandler(): void {
+    private _preventDefaults(): void {
         document.ondragover = (event: DragEvent) => {
             event.preventDefault();
-            window.blur();
         }
         
         document.ondragleave = (event: DragEvent) => {
@@ -250,12 +250,22 @@ class Application extends React.Component<Application.Props, Application.State> 
 
         document.ondrop = (event: DragEvent) => {
             event.preventDefault();
+        }
+    }
+
+    private _registerFileHandler(): void {
+        document.ondrop = (event: DragEvent) => {
+            event.preventDefault();
             document.getElementById("main").focus();
             let files = event.dataTransfer.files;
             for (let i = 0; i < files.length; i ++){
                 this._openFile(files[i].path);
             }
         };
+
+        ipcRenderer.on(AppIPC.OPEN_FILES, (event: any, path: string) => {
+            this._openFile(path);
+        });
     }
 
     private _openFile(path: string){

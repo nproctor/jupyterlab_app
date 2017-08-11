@@ -50,6 +50,12 @@ namespace JupyterApplicationIPC {
     const LAB_HOME_DIR = 'lab-dir';
 
     export
+    const READY_FOR_FILES = 'send-files';
+
+    export
+    const OPEN_FILES = 'open-files';
+
+    export
     const POST_ZOOM_EVENT = 'zoom-event';
 
     export
