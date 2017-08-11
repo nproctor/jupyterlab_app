@@ -44,6 +44,12 @@ namespace JupyterApplicationIPC {
     const REQUEST_OPEN_CONNECTION = 'new-connection';
 
     export
+    const REQUEST_LAB_HOME_DIR = 'get-lab-dir';
+
+    export
+    const LAB_HOME_DIR = 'lab-dir';
+
+    export
     const POST_ZOOM_EVENT = 'zoom-event';
 
     export

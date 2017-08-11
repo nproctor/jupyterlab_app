@@ -173,7 +173,11 @@ class JupyterApplication {
                 this._createWindow({state: 'remote', remoteServerId: arg.remoteServerId});
             else
                 this._createWindow({state: 'local'});
-        })
+        });
+
+        ipcMain.on(AppIPC.REQUEST_LAB_HOME_DIR, (event: any) => {
+            event.sender.send(AppIPC.LAB_HOME_DIR, app.getPath("home"));
+        });
     }
 
     private _start(state: JupyterApplication.IState): void {

@@ -14,7 +14,7 @@ import {
 } from '@jupyterlab/coreutils';
 
 import {
-    JupyterServerIPC as ServerIPC,
+    JupyterServerIPC as ServerIPC, JupyterApplicationIPC as AppIPC
 } from 'jupyterlab_app/src/ipc';
 
 import {
@@ -42,13 +42,14 @@ class Application extends React.Component<Application.Props, Application.State> 
 
     constructor(props: Application.Props) {
         super(props);
+        this._setLabDir();
+        this._registerFileHandler();
         this._renderServerManager = this._renderServerManager.bind(this);
         this._renderSplash = this._renderSplash.bind(this);
         this._renderEmpty = this._renderEmpty.bind(this);
         this._renderErrorScreen = this._renderErrorScreen.bind(this);
         this._connectionAdded = this._connectionAdded.bind(this);
         this._launchFromPath = this._launchFromPath.bind(this);
-
         this._labReady = this._setupLab();
         
         ipcRenderer.on(ServerIPC.RESPOND_SERVER_STARTED, (event: any, data: ServerIPC.IServerStarted) => {
@@ -118,7 +119,6 @@ class Application extends React.Component<Application.Props, Application.State> 
     render() {
         let splash = this.state.renderSplash();
         let content = this.state.renderState();
-
         return (
             <div className='jpe-body'>
                 {splash}
@@ -234,6 +234,45 @@ class Application extends React.Component<Application.Props, Application.State> 
     private _renderEmpty(): JSX.Element {
         return null;
     }
+
+    private _registerFileHandler(): void {
+        document.ondragover = (event: DragEvent) => {
+            event.preventDefault();
+            window.blur();
+        }
+        
+        document.ondragleave = (event: DragEvent) => {
+            event.preventDefault();
+        }
+        document.ondragend = (event: DragEvent) => {
+            event.preventDefault();
+        }
+
+        document.ondrop = (event: DragEvent) => {
+            event.preventDefault();
+            document.getElementById("main").focus();
+            let files = event.dataTransfer.files;
+            for (let i = 0; i < files.length; i ++){
+                this._openFile(files[i].path);
+            }
+        };
+    }
+
+    private _openFile(path: string){
+        if (this._labDir){
+            let relPath = path.replace(this._labDir, '');
+            this._lab.commands.execute('docmanager:open', {path: relPath});
+        }
+    }
+
+    private _setLabDir(){
+        ipcRenderer.send(AppIPC.REQUEST_LAB_HOME_DIR);
+        ipcRenderer.on(AppIPC.LAB_HOME_DIR, (event: any, path: string) => {
+            this._labDir = path;
+        });
+    }
+
+    private _labDir: string; 
 
     private _lab: ElectronJupyterLab;
 
