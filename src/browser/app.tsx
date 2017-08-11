@@ -82,7 +82,7 @@ class Application extends React.Component<Application.Props, Application.State> 
                     console.log(e);
                 }
                 this._lab.restored.then( () => {
-                    ipcRenderer.send(AppIPC.READY_FOR_FILES);
+                    ipcRenderer.send(AppIPC.LAB_READY);
                     (this.refs.splash as SplashScreen).fadeSplashScreen();
                 });
             });

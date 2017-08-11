@@ -50,7 +50,7 @@ namespace JupyterApplicationIPC {
     const LAB_HOME_DIR = 'lab-dir';
 
     export
-    const READY_FOR_FILES = 'send-files';
+    const LAB_READY = 'lab-ready';
 
     export
     const OPEN_FILES = 'open-files';

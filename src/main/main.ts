@@ -22,9 +22,9 @@ let jupyterApp;
  * "open-file" listener should be registered before
  * app ready for "double click" files to open in application
  */
-app.on('will-finish-launching', () => {
-  app.on('open-file', (event: any, path: string) => {
-    ipcMain.on(AppIPC.READY_FOR_FILES, (event: any) => {
+app.once('will-finish-launching', (e: Electron.Event) => {
+  app.once('open-file', (event: Electron.Event, path: string) => {
+    ipcMain.once(AppIPC.LAB_READY, (event: Electron.Event) => {
       event.sender.send(AppIPC.OPEN_FILES, path);
     });
   });

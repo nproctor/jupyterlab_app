@@ -153,12 +153,17 @@ class JupyterApplication {
                 else {
                     this._createWindow({state: 'local'});
                 }
+                ipcMain.once(AppIPC.LAB_READY, (event: Electron.Event) => {
+                    event.sender.send(AppIPC.OPEN_FILES, path);
+                });
             }
-            if ((window = BrowserWindow.getFocusedWindow()) === null){
+            else if ((window = BrowserWindow.getFocusedWindow()) === null){
                 this._windows[0].browserWindow.focus();
                 window = this._windows[0].browserWindow;
             }
-            window.webContents.send(AppIPC.OPEN_FILES, path);
+            if (window !== null){
+                window.webContents.send(AppIPC.OPEN_FILES, path);
+            }
         });
 
         app.on('will-quit', (event) => {
