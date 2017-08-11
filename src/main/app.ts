@@ -144,6 +144,23 @@ class JupyterApplication {
             }
         });
 
+        app.on('open-file', (e: any, path: string) => {
+            let window: Electron.BrowserWindow = null;
+            if (this._windows.length === 0) {
+                if (this._appState.windows.length > 0) {
+                    this._createWindow(this._appState.windows[0]);
+                }
+                else {
+                    this._createWindow({state: 'local'});
+                }
+            }
+            if ((window = BrowserWindow.getFocusedWindow()) === null){
+                this._windows[0].browserWindow.focus();
+                window = this._windows[0].browserWindow;
+            }
+            window.webContents.send(AppIPC.OPEN_FILES, path);
+        });
+
         app.on('will-quit', (event) => {
             event.preventDefault();
             this._appStateDB.save(JupyterApplication.APP_STATE_NAMESPACE, this._appState)

@@ -18,6 +18,10 @@ require('electron-debug')({showDevTools: false});
 
 let jupyterApp;
 
+/**
+ * "open-file" listener should be registered before
+ * app ready for "double click" files to open in application
+ */
 app.on('will-finish-launching', () => {
   app.on('open-file', (event: any, path: string) => {
     ipcMain.on(AppIPC.READY_FOR_FILES, (event: any) => {
