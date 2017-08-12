@@ -145,24 +145,21 @@ class JupyterApplication {
         });
 
         app.on('open-file', (e: any, path: string) => {
-            let window: Electron.BrowserWindow = null;
-            if (this._windows.length === 0) {
-                if (this._appState.windows.length > 0) {
-                    this._createWindow(this._appState.windows[0]);
+            let window = this._getFocusedWindow();
+            if (window === null || window.state().state !== 'local' ){
+                let state: JupyterLabWindow.IOptions = null;
+                if (this._appState.windows.length > 0){
+                    state = this._appState.windows[0];
                 }
-                else {
-                    this._createWindow({state: 'local'});
-                }
+                state.state = 'local';
+                state.remoteServerId = null;
+                this._createWindow(state);
                 ipcMain.once(AppIPC.LAB_READY, (event: Electron.Event) => {
                     event.sender.send(AppIPC.OPEN_FILES, path);
                 });
             }
-            else if ((window = BrowserWindow.getFocusedWindow()) === null){
-                this._windows[0].browserWindow.focus();
-                window = this._windows[0].browserWindow;
-            }
-            if (window !== null){
-                window.webContents.send(AppIPC.OPEN_FILES, path);
+            else {
+                window.browserWindow.webContents.send(AppIPC.OPEN_FILES, path);
             }
         });
 
@@ -214,6 +211,17 @@ class JupyterApplication {
         for (let window of state.windows) {
             this._createWindow(window)
         }
+    }
+
+    private _getFocusedWindow(): JupyterLabWindow{
+        let windows = this._windows;
+        for (let i = 0; i < windows.length; i ++){
+            if (windows[i].browserWindow.isFocused())
+                return windows[i];
+        }
+        if (windows.length > 0)
+            return windows[0];
+        return null;
     }
 
     /**
